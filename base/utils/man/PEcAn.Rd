@@ -11,7 +11,7 @@
 \title{R package to support PEcAn, the Predictive Ecosystem Analyzer}
 \description{
 Instructions for the use of this package are provided in the project
-documentation \url{https://pecanproject.github.io/documentation.html}.
+documentation \url{https://pecanproject.github.io/documentation/}.
 }
 \details{
 Project homepage: \url{pecanproject.org}
@@ -49,6 +49,14 @@ Current development is focused on developing PEcAn into a real-time data
 assimilation and forecasting system. This system will provide a detailed
 analysis of the past and present ecosystem functioning that seamlessly
 transitions into forecasts.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://pecanproject.github.io}
+  \item Report bugs at \url{https://github.com/PecanProject/pecan/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Rob Kooper \email{kooper@illinois.edu}

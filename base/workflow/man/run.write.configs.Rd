@@ -6,8 +6,9 @@
 \usage{
 run.write.configs(
   settings,
+  ensemble.size,
+  input_design,
   write = TRUE,
-  ens.sample.method = "uniform",
   posterior.files = rep(NA, length(settings$pfts)),
   overwrite = TRUE
 )
@@ -15,9 +16,13 @@ run.write.configs(
 \arguments{
 \item{settings}{a PEcAn settings list}
 
-\item{write}{should the runs be written to the database?}
+\item{ensemble.size}{number of ensemble runs}
 
-\item{ens.sample.method}{how to sample the ensemble members('halton' sequence or 'uniform' random)}
+\item{input_design}{Input design data.frame coordinating input files across runs.
+Contains columns for each sampled input (met, param, etc.) with row indices,
+as documented in \code{runModule.run.write.configs()}.}
+
+\item{write}{should the runs be written to the database?}
 
 \item{posterior.files}{Filenames for posteriors for drawing samples for ensemble and sensitivity
 analysis (e.g. post.distns.Rdata, or prior.distns.Rdata)}
@@ -41,5 +46,5 @@ The default value for \code{posterior.files} is NA, in which case the
    files within this workflow, to avoid confusion.
 }
 \author{
-David LeBauer, Shawn Serbin, Ryan Kelly, Mike Dietze
+David LeBauer, Shawn Serbin, Ryan Kelly, Mike Dietze, Akash B V
 }

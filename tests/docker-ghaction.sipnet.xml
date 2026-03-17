@@ -1,5 +1,5 @@
 <?xml version="1.0"?><pecan>
-  <outdir>/tmp/docker_stack_tests/sipnet</outdir>
+  <outdir>/data/docker_stack_tests/sipnet</outdir>
   <database>
     <bety>
       <user>bety</user>

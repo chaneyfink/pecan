@@ -37,7 +37,9 @@ write_restart.SIPNET <- function(outdir, runid, start.time, stop.time, settings,
                 file.path(outdir, runid, paste0("sipnet.", as.Date(start.time), ".out")))
     system(paste("rm", file.path(rundir, runid, "sipnet.clim")))
   } else {
-    print(paste("Files not renamed -- Need to rerun timestep", start.time, "before next time step"))
+    if (verbose) {
+      print(paste("Files not renamed -- Need to rerun timestep", start.time, "before next time step"))
+    }
   }
   
   settings$run$start.date <- start.time
@@ -45,12 +47,11 @@ write_restart.SIPNET <- function(outdir, runid, start.time, stop.time, settings,
   
   ## Converting to sipnet units
   prior.sla <- new.params[[which(!names(new.params) %in% c("soil", "soil_SDA", "restart"))[1]]]$SLA
-  unit.conv <- 2 * (10000 / 1) * (1 / 1000) * (3.154 * 10^7)  # kgC/m2/s -> Mg/ha/yr
   
   analysis.save <- list()
   
   if ("NPP" %in% variables) {
-    analysis.save[[length(analysis.save) + 1]] <- PEcAn.utils::ud_convert(new.state$NPP, "kg/m^2/s", "Mg/ha/yr")  #*unit.conv -> Mg/ha/yr
+    analysis.save[[length(analysis.save) + 1]] <- PEcAn.utils::ud_convert(new.state$NPP, "kg/m^2/s", "Mg/ha/yr")
     names(analysis.save[[length(analysis.save)]]) <- c("NPP")
   }
 
@@ -87,6 +88,12 @@ write_restart.SIPNET <- function(outdir, runid, start.time, stop.time, settings,
     analysis.save[[length(analysis.save) + 1]] <- new.state$litter_mass_content_of_water  ## unitless
     if (new.state$litter_mass_content_of_water < 0 || new.state$litter_mass_content_of_water > 1) analysis.save[[length(analysis.save)]] <- 0.5
     names(analysis.save[[length(analysis.save)]]) <- c("litter_mass_content_of_water")
+  }
+  
+  if ("SoilMoist" %in% variables) {
+    analysis.save[[length(analysis.save) + 1]] <- new.state$SoilMoist
+    if (new.state$SoilMoist < 0) analysis.save[[length(analysis.save)]] <- 0
+    names(analysis.save[[length(analysis.save)]]) <- c("soilWater")
   }
   
   if ("SoilMoistFrac" %in% variables) {

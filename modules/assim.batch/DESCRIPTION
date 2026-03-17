@@ -1,7 +1,7 @@
 Package: PEcAn.assim.batch
 Type: Package
 Title: PEcAn Functions Used for Ecological Forecasts and Reanalysis
-Version: 1.8.0.9000
+Version: 1.9.1.9000
 Authors@R: c(person("Mike", "Dietze", role = c("aut"),
                      email = "dietze@bu.edu"),
              person("Istem", "Fer", role = c("aut", "cre"),
@@ -14,6 +14,8 @@ Description: The Predictive Ecosystem Carbon Analyzer (PEcAn) is a scientific
     model parameterization, execution, and analysis. The goal of PECAn is to
     streamline the interaction between data and models, and to improve the
     efficacy of scientific investigation.
+URL: https://pecanproject.github.io
+BugReports: https://github.com/PecanProject/pecan/issues
 VignetteBuilder: knitr, rmarkdown
 Imports:
     abind,
@@ -49,7 +51,7 @@ Imports:
     lqmm,
     mvtnorm
 Suggests:
-    knitr (>= 1.42),
+    knitr (>= 1.50),
     rmarkdown (>= 2.19),
     testthat (>= 1.0.2)
 License: BSD_3_clause + file LICENSE
@@ -57,5 +59,6 @@ Copyright: Authors
 LazyLoad: yes
 LazyData: FALSE
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
+X-schema.org-keywords: data-assimilation, parameter-estimation, Bayesian-inference, ecological-modeling, model-calibration

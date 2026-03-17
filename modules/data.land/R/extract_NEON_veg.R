@@ -20,7 +20,11 @@
 #' start_date = as.Date("2020-01-01") 
 #' end_date = as.Date("2021-09-01")
 extract_NEON_veg <- function(lon, lat, start_date, end_date, store_dir, neonsites = NULL, ...){
-  
+  if (!requireNamespace("neonstore", quietly = TRUE)) {
+    PEcAn.logger::logger.severe(
+      "Package 'neonstore' is required for extracting NEON vegetation data but is not installed.",
+      "Please install it with: install.packages('neonstore')")
+  }
   #Function to grab the first measurements for each plot between start and end date.
   Grab_First_Measurements_of_Each_Plot <- function(temp_data){
     Plot_Year <- paste0(temp_data$plot, temp_data$year)
@@ -50,7 +54,9 @@ extract_NEON_veg <- function(lon, lat, start_date, end_date, store_dir, neonsite
     neonsites <- neonstore::neon_sites(api = "https://data.neonscience.org/api/v0", .token = Sys.getenv("NEON_TOKEN"))
   }
   neonsites <- dplyr::select(neonsites, "siteCode", "siteLatitude", "siteLongitude") #select for relevant columns
-  betyneondist <- swfscMisc::distance(lat1 = lat, lon1 = lon, lat2 = neonsites$siteLatitude, lon2 = neonsites$siteLongitude)
+  pt1 <- terra::vect(matrix(c(lon1 = lon, lat1 = lat) , ncol = 2), type = "points", crs = "EPSG:4326")
+  pt2 <- terra::vect(matrix(c(lon2 = neonsites$siteLongitude, lat2 = neonsites$siteLatitude) , ncol = 2), type = "points", crs = "EPSG:4326")
+  betyneondist <- terra::distance(pt1, pt2)
   mindist <- min(betyneondist)
   distloc <- match(mindist, betyneondist)
   lat <- neonsites$siteLatitude[distloc]
