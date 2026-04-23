@@ -64,8 +64,10 @@
 #'
 #' @param defaults nested list of named constant parameter values. The
 #' structure is `list(list(constants = list(trait1 = <value>, trait2 = <value>, ...)))`.
-#' Only `defaults[[1]]$constants` is used; all other elements are silently ignored. 
-#' @param trait.values vector of samples for a given trait
+#' Only `defaults[[1]]$constants` is used; all other elements are silently ignored.
+#' @param trait.values named list of trait values for each PFT. SIPNET can
+#'  handle only one vegetation PFT, and an optional "soil" PFT for soil constants.
+#'  `trait.values` that do not fit this format will throw a warning.
 #' @param settings PEcAn settings object
 #' @param run.id run ID
 #' @param inputs list of model inputs
@@ -77,6 +79,22 @@
 #' @author Michael Dietze, Alexey Shiklomanov
 write.config.SIPNET <- function(defaults, trait.values, settings, run.id, inputs = NULL, IC = NULL,
                                 restart = NULL, spinup = NULL) {
+
+  if (!is.list(trait.values)) {
+    PEcAn.logger::logger.severe(
+      "`trait.values` must be a list with names corresponding to PFTs."
+    )
+  }
+
+  if (
+    (length(trait.values) > 2) ||
+      (length(trait.values) == 2 && !("soil" %in% names(trait.values)))
+  ) {
+    PEcAn.logger::logger.warn(paste0(
+      "SIPNET can only handle one vegetation PFT and one optional soil PFT. ",
+      "Passing multiple vegetation PFTs may lead to unexpected behavior."
+    ))
+  }
 
   rev_raw <- settings$model$revision
   legacy_v1 <- c("102319", "136", "r136", "ssr", "git")
@@ -124,7 +142,7 @@ write.config.SIPNET <- function(defaults, trait.values, settings, run.id, inputs
     }
   }
   PEcAn.logger::logger.info(paste0("Writing SIPNET configs with input ", template.clim))
-  
+
   # find out where to write run/ouput
   rundir <- file.path(settings$host$rundir, as.character(run.id))
   outdir <- file.path(settings$host$outdir, as.character(run.id))
@@ -132,7 +150,7 @@ write.config.SIPNET <- function(defaults, trait.values, settings, run.id, inputs
     rundir <- file.path(settings$rundir, as.character(run.id))
     outdir <- file.path(settings$modeloutdir, as.character(run.id))
   }
-  
+
   # create launch script (which will create symlink)
   if (!is.null(settings$model$jobtemplate) && file.exists(settings$model$jobtemplate)) {
     jobsh <- readLines(con = settings$model$jobtemplate, n = -1)
@@ -234,7 +252,7 @@ write.config.SIPNET <- function(defaults, trait.values, settings, run.id, inputs
     if (!file.exists(event_file)) {
       PEcAn.logger::logger.warn("Event file not found at", event_file)
     }
-    file.copy(event_file, file.path(rundir, "events.in"))
+    file.copy(event_file, file.path(rundir, "events.in"), overwrite = TRUE)
   }
 
 
@@ -574,6 +592,57 @@ write.config.SIPNET <- function(defaults, trait.values, settings, run.id, inputs
     # Leaf growth.  Amount of C added to the leaf during the greenup period
     if ("leafGrowth" %in% pft.trait.names) {
       param[which(param[, 1] == "leafGrowth"), 2] <- pft.traits[which(pft.trait.names == "leafGrowth")]
+    }
+
+    ### ----- Nitrogen cycle parameters (SIPNET v2)
+    # C:N ratios
+    if ("c2n_leaf" %in% pft.trait.names) {
+      param[which(param[, 1] == "leafCN"), 2] <- pft.traits[which(pft.trait.names == "c2n_leaf")]
+    }
+    if ("c2n_wood" %in% pft.trait.names) {
+      param[which(param[, 1] == "woodCN"), 2] <- pft.traits[which(pft.trait.names == "c2n_wood")]
+    }
+    if ("c2n_fineroot" %in% pft.trait.names) {
+      param[which(param[, 1] == "fineRootCN"), 2] <- pft.traits[which(pft.trait.names == "c2n_fineroot")]
+    }
+    # Decomposition C:N half-saturation parameter
+    if ("kCN" %in% pft.trait.names) {
+      param[which(param[, 1] == "kCN"), 2] <- pft.traits[which(pft.trait.names == "kCN")]
+    }
+    # N loss parameters
+    if ("n_volatilization_rate" %in% pft.trait.names) {
+      param[which(param[, 1] == "nVolatilizationFrac"), 2] <- pft.traits[which(pft.trait.names == "n_volatilization_rate")]
+    }
+    if ("n_leaching_frac" %in% pft.trait.names) {
+      param[which(param[, 1] == "nLeachingFrac"), 2] <- pft.traits[which(pft.trait.names == "n_leaching_frac")]
+    }
+    # N fixation parameters
+    if ("n_fixation_frac_max" %in% pft.trait.names) {
+      param[which(param[, 1] == "nFixationFracMax"), 2] <- pft.traits[which(pft.trait.names == "n_fixation_frac_max")]
+    }
+    if ("n_fix_half_sat" %in% pft.trait.names) {
+      param[which(param[, 1] == "halfNFixationMax"), 2] <- pft.traits[which(pft.trait.names == "n_fix_half_sat")]
+    }
+    # Anaerobic moisture parameters
+    if ("f_anoxia" %in% pft.trait.names) {
+      param[which(param[, 1] == "fAnoxia"), 2] <- pft.traits[which(pft.trait.names == "f_anoxia")]
+    }
+    if ("anaerobic_decomp_rate" %in% pft.trait.names) {
+      param[which(param[, 1] == "anaerobicDecompRate"), 2] <- pft.traits[which(pft.trait.names == "anaerobic_decomp_rate")]
+    }
+    if ("anaerobic_trans_exp" %in% pft.trait.names) {
+      param[which(param[, 1] == "anaerobicTransExp"), 2] <- pft.traits[which(pft.trait.names == "anaerobic_trans_exp")]
+    }
+    # Methane production parameters
+    if ("soil_methane_rate" %in% pft.trait.names) {
+      param[which(param[, 1] == "soilMethaneRate"), 2] <- pft.traits[which(pft.trait.names == "soil_methane_rate")]
+    }
+    if ("litter_methane_rate" %in% pft.trait.names) {
+      param[which(param[, 1] == "litterMethaneRate"), 2] <- pft.traits[which(pft.trait.names == "litter_methane_rate")]
+    }
+    # water drainage fraction (requires FLOODING = 1 in sipnet.in)
+    if ("water_drain_frac" %in% pft.trait.names) {
+      param[which(param[, 1] == "waterDrainFrac"), 2] <- pft.traits[which(pft.trait.names == "water_drain_frac")]
     }
 
     #update LeafOnday and LeafOffDay

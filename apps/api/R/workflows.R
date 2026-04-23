@@ -312,7 +312,9 @@ getWorkflowFilesAsZip <- function(req, id, filenames, res){
 
       full_files[i] <- filepath
     }
-    zip_file <- zip::zipr("output.zip", full_files)
-    return(zip_file)
+    zip_path <- zip::zipr("output.zip", full_files)
+    bin <- readBin(zip_path, "raw", n = file.info(zip_path)$size)
+    file.remove(zip_path)
+    return(bin)
   }
 }

@@ -65,6 +65,13 @@ cp docker-compose.dev.yml docker-compose.override.yml
 
 You can now use the command `docker compose` to work with the containers setup for development. **The rest of this document assumes you have done this step.**
 
+_Note for Apple Silicon (M1/M2/M3/M4) macOS users:_ The default Traefik image (`traefik:v2.9`) is built only for `linux/amd64` and cannot reliably communicate with the Docker socket when running under emulation on ARM64. This causes all web routes to return 404 errors. To fix this, add the following to your `docker-compose.override.yml` under `services:` and above `pecan:`:
+```sh
+  traefik:
+    image: traefik:v2.11
+    platform: linux/arm64
+```
+
 ### First time setup
 
 The steps in this section only need to be done the first time you start working with the stack in docker. After this is done you can skip these steps. You can find more detail about the docker commands in the [pecan documentation](https://pecanproject.github.io/pecan-documentation/latest/docker-index.html).

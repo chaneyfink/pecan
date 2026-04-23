@@ -104,7 +104,7 @@ searchPosteriors <- function(req, pft_id = NA, host_id = NA,
       result$prev_page <- paste0(
         req$rook.url_scheme, "://",
         req$HTTP_HOST,
-        "/api/workflows",
+        "/api/posteriors",
         req$PATH_INFO,
         substr(req$QUERY_STRING,
                0,
